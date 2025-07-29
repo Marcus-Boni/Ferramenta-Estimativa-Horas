@@ -54,6 +54,7 @@ export const getTasks = async (teamId: string): Promise<Task[]> => {
         contexto: data.contexto || null, // CORRIGIDO: incluir campo contexto
         responsavel: data.responsavel,
         horasEstimadas: data.horasEstimadas,
+        status: data.status || 'em-andamento', // Status padrão para tarefas existentes
         createdAt: data.createdAt?.toDate(),
       });
     });

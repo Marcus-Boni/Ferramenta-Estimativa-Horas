@@ -1,22 +1,35 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import * as XLSX from 'xlsx';
-import { Task } from '@/types';
+import { Task, TaskStatus } from '@/types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Função para converter status em texto para Excel
+const getStatusLabel = (status: TaskStatus): string => {
+  const statusLabels = {
+    'planejada': 'Planejada',
+    'em-andamento': 'Em Andamento',
+    'pendente': 'Pendente (Aguardando definições)',
+    'concluida': 'Concluída',
+    'cancelada': 'Cancelada',
+  };
+  return statusLabels[status] || 'Planejada';
+};
+
 // Função para exportar tarefas para Excel com formatação avançada
 export const exportToExcel = (tasks: Task[], teamId: string): void => {
   try {
-    // Preparar os dados para exportação com contexto incluído
+    // Preparar os dados para exportação com contexto e status incluídos
     const exportData = tasks.map((task, index) => ({
       'Nº': index + 1,
       'ID Azure DevOps': task.idDaTarefaAzure || 'N/A',
       'Título da Tarefa': task.tituloDaTarefa,
       'Contexto/Módulo': task.contexto || 'Não informado',
       'Responsável': task.responsavel,
+      'Status': getStatusLabel(task.status),
       'Horas Estimadas': task.horasEstimadas + 'h',
       'Data de Criação': task.createdAt ? formatDateOnly(task.createdAt) : 'N/A',
     }));
@@ -29,9 +42,16 @@ export const exportToExcel = (tasks: Task[], teamId: string): void => {
       return acc;
     }, {} as Record<string, number>);
     
+    // Estatísticas por status
+    const statusStats = tasks.reduce((acc, task) => {
+      const status = getStatusLabel(task.status);
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
     // Criar dados do cabeçalho melhorado
     const headerData = [
-      ['RELATÓRIO DE ESTIMATIVA DE HORAS - HOURЕСТIMATOR'],
+      ['RELATÓRIO DE ESTIMATIVA DE HORAS - HOURЕSТIMATOR'],
       [''],
       [`📊 EQUIPE: ${teamId.toUpperCase()}`],
       [`📅 DATA DE GERAÇÃO: ${new Date().toLocaleDateString('pt-BR', { 
@@ -49,7 +69,10 @@ export const exportToExcel = (tasks: Task[], teamId: string): void => {
       ['📊 DISTRIBUIÇÃO POR CONTEXTO/MÓDULO:'],
       ...Object.entries(contextos).map(([contexto, horas]) => [`• ${contexto}: ${horas}h`]),
       [''],
-      ['📋 DETALHAMENTO DAS TAREFAS'],
+      ['� DISTRIBUIÇÃO POR STATUS:'],
+      ...Object.entries(statusStats).map(([status, quantidade]) => [`• ${status}: ${quantidade} tarefa${quantidade !== 1 ? 's' : ''}`]),
+      [''],
+      ['�📋 DETALHAMENTO DAS TAREFAS'],
       ['']
     ];
 
@@ -75,13 +98,14 @@ export const exportToExcel = (tasks: Task[], teamId: string): void => {
       ['', '', '', 'TOTAL GERAL:', totalHoras + 'h', '']
     ], { origin: `A${lastRow + 1}` });
 
-    // Configurar largura das colunas otimizada para incluir contexto
+    // Configurar largura das colunas otimizada para incluir contexto e status
     const colWidths = [
       { wch: 6 },   // Nº
       { wch: 16 },  // ID Azure DevOps
       { wch: 35 },  // Título da Tarefa
       { wch: 18 },  // Contexto/Módulo
       { wch: 18 },  // Responsável
+      { wch: 25 },  // Status
       { wch: 12 },  // Horas Estimadas
       { wch: 14 },  // Data de Criação
     ];
@@ -91,12 +115,12 @@ export const exportToExcel = (tasks: Task[], teamId: string): void => {
     if (!ws['!merges']) ws['!merges'] = [];
     ws['!merges'].push({
       s: { r: 0, c: 0 }, // início (linha 0, coluna 0)
-      e: { r: 0, c: 6 }  // fim (linha 0, coluna 6) - ajustado para 7 colunas
+      e: { r: 0, c: 7 }  // fim (linha 0, coluna 7) - ajustado para 8 colunas
     });
 
     // Formatação do cabeçalho da tabela
     const tableHeaderRow = dataStartRow - 1; // Linha do cabeçalho da tabela
-    for (let col = 0; col < 7; col++) { // 7 colunas agora
+    for (let col = 0; col < 8; col++) { // 8 colunas agora
       const cellAddress = XLSX.utils.encode_cell({ r: tableHeaderRow, c: col });
       if (!ws[cellAddress]) continue;
       ws[cellAddress].s = {

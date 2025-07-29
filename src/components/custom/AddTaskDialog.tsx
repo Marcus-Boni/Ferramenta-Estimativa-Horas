@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Task } from '@/types';
+import { Task, TaskStatus } from '@/types';
 import { showToast } from '@/lib/toast';
 
 interface AddTaskDialogProps {
@@ -28,6 +28,7 @@ export function AddTaskDialog({ onAddTask, isLoading = false }: AddTaskDialogPro
     contexto: '',
     responsavel: '',
     horasEstimadas: '',
+    status: 'planejada' as TaskStatus,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -54,6 +55,7 @@ export function AddTaskDialog({ onAddTask, isLoading = false }: AddTaskDialogPro
         contexto: formData.contexto.trim() || null, // CORRIGIDO: usar null em vez de undefined
         responsavel: formData.responsavel.trim(),
         horasEstimadas,
+        status: formData.status,
       });
       
       // Limpar formulário e fechar modal
@@ -63,6 +65,7 @@ export function AddTaskDialog({ onAddTask, isLoading = false }: AddTaskDialogPro
         contexto: '',
         responsavel: '',
         horasEstimadas: '',
+        status: 'planejada' as TaskStatus,
       });
       setOpen(false);
       showToast.success('Tarefa adicionada com sucesso!');
@@ -144,6 +147,27 @@ export function AddTaskDialog({ onAddTask, isLoading = false }: AddTaskDialogPro
                 onChange={(e) => handleInputChange('responsavel', e.target.value)}
                 disabled={isSubmitting}
               />
+            </div>
+            <div className="grid gap-2">
+              <label htmlFor="status" className="text-sm font-medium">
+                Status da Tarefa *
+              </label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                disabled={isSubmitting}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="planejada">📋 Planejada</option>
+                <option value="em-andamento">🚀 Em Andamento</option>
+                <option value="pendente">⏳ Pendente (Aguardando definições)</option>
+                <option value="concluida">✅ Concluída</option>
+                <option value="cancelada">❌ Cancelada</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Use &quot;Pendente&quot; para tarefas que dependem de definições do cliente
+              </p>
             </div>
             <div className="grid gap-2">
               <label htmlFor="horasEstimadas" className="text-sm font-medium">

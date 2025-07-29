@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EditTaskDialog } from './EditTaskDialog';
-import { Task } from '@/types';
+import { Task, TaskStatus } from '@/types';
 import { formatDate } from '@/lib/utils';
 import { showToast } from '@/lib/toast';
 
@@ -32,6 +32,39 @@ interface TaskTableProps {
   onDeleteTask: (taskId: string) => Promise<void>;
   isLoading?: boolean;
 }
+
+const getStatusBadge = (status: TaskStatus) => {
+  const statusConfig = {
+    'planejada': { 
+      label: '📋 Planejada', 
+      className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' 
+    },
+    'em-andamento': { 
+      label: '🚀 Em Andamento', 
+      className: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' 
+    },
+    'pendente': { 
+      label: '⏳ Pendente', 
+      className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' 
+    },
+    'concluida': { 
+      label: '✅ Concluída', 
+      className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' 
+    },
+    'cancelada': { 
+      label: '❌ Cancelada', 
+      className: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300' 
+    },
+  };
+
+  const config = statusConfig[status] || statusConfig['planejada'];
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.className}`}>
+      {config.label}
+    </span>
+  );
+};
 
 export function TaskTable({ tasks, onUpdateTask, onDeleteTask, isLoading = false }: TaskTableProps) {
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
@@ -115,6 +148,7 @@ export function TaskTable({ tasks, onUpdateTask, onDeleteTask, isLoading = false
                   <TableHead>Título da Tarefa</TableHead>
                   <TableHead className="w-[140px]">Contexto/Módulo</TableHead>
                   <TableHead className="w-[140px]">Responsável</TableHead>
+                  <TableHead className="w-[120px]">Status</TableHead>
                   <TableHead className="w-[100px] text-right">Horas Est.</TableHead>
                   <TableHead className="w-[130px]">Data Criação</TableHead>
                   <TableHead className="w-[110px] text-center">Ações</TableHead>
@@ -139,6 +173,9 @@ export function TaskTable({ tasks, onUpdateTask, onDeleteTask, isLoading = false
                       </div>
                     </TableCell>
                     <TableCell>{task.responsavel}</TableCell>
+                    <TableCell>
+                      {getStatusBadge(task.status)}
+                    </TableCell>
                     <TableCell className="text-right font-medium">
                       {task.horasEstimadas.toFixed(1)}h
                     </TableCell>

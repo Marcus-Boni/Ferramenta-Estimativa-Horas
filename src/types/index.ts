@@ -1,3 +1,5 @@
+export type TaskStatus = 'planejada' | 'em-andamento' | 'pendente' | 'concluida' | 'cancelada';
+
 export interface Task {
   id?: string;
   idDaTarefaAzure?: string | null;
@@ -5,6 +7,7 @@ export interface Task {
   contexto?: string | null; 
   responsavel: string;
   horasEstimadas: number;
+  status: TaskStatus;
   createdAt?: Date;
 }
 
