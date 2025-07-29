@@ -1,103 +1,169 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Header } from '@/components/custom/Header';
+import { validateTeamId } from '@/lib/utils';
+import { initializeAuth } from '@/lib/firebase';
+import { showToast } from '@/lib/toast';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [teamId, setTeamId] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<'access' | 'create'>('access');
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+  useEffect(() => {
+    // Inicializar autenticação Firebase quando a página carregar
+    initializeAuth();
+    
+    // Verificar se há um teamId salvo no localStorage
+    const savedTeamId = localStorage.getItem('currentTeamId');
+    if (savedTeamId) {
+      setTeamId(savedTeamId);
+    }
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const trimmedTeamId = teamId.trim();
+    
+    if (!validateTeamId(trimmedTeamId)) {
+      showToast.validation.teamId();
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Salvar o teamId no localStorage
+      localStorage.setItem('currentTeamId', trimmedTeamId);
+      
+      // Navegar para a dashboard da equipe
+      router.push(`/${trimmedTeamId}`);
+    } catch (error) {
+      console.error('Erro ao acessar equipe:', error);
+      showToast.error('Erro ao acessar equipe. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const generateRandomTeamId = () => {
+    const timestamp = Date.now().toString().slice(-6);
+    const randomChars = Math.random().toString(36).substring(2, 8);
+    return `team-${randomChars}-${timestamp}`;
+  };
+
+  const handleCreateNewTeam = () => {
+    const newTeamId = generateRandomTeamId();
+    setTeamId(newTeamId);
+    setMode('create');
+  };
+
+  const handleBackToAccess = () => {
+    setMode('access');
+    setTeamId('');
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      
+      <main className="max-w-md mx-auto px-4 pt-16">
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">
+              {mode === 'access' ? 'Acesso por Equipe' : 'Criar Nova Equipe'}
+            </CardTitle>
+            <CardDescription>
+              {mode === 'access' 
+                ? 'Digite o ID da sua equipe para acessar as estimativas de horas'
+                : 'Confirme o ID gerado para sua nova equipe ou edite se preferir'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {mode === 'create' && (
+              <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-md">
+                <p className="text-sm text-primary font-medium">
+                  ✨ ID da equipe gerado automaticamente
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Você pode editá-lo se preferir um nome personalizado
+                </p>
+              </div>
+            )}
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="teamId" className="text-sm font-medium">
+                  ID da Equipe *
+                </label>
+                <Input
+                  id="teamId"
+                  type="text"
+                  placeholder="Ex: optsolv-dev-team-1"
+                  value={teamId}
+                  onChange={(e) => setTeamId(e.target.value)}
+                  disabled={isLoading}
+                  className="text-center mt-2"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Mínimo 3 caracteres. Apenas letras, números, hífens e underscores.
+                </p>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-primary hover:bg-primary/90"
+                disabled={isLoading || !teamId.trim()}
+              >
+                {isLoading ? 'Acessando...' : mode === 'access' ? 'Acessar Dashboard' : 'Criar Equipe'}
+              </Button>
+            </form>
+            
+            <div className="mt-6 space-y-4">
+              {mode === 'access' ? (
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Ainda não tem uma equipe?
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={handleCreateNewTeam}
+                    disabled={isLoading}
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                  >
+                    Criar Nova Equipe
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center">
+                  <Button
+                    variant="outline"
+                    onClick={handleBackToAccess}
+                    disabled={isLoading}
+                    className="w-full"
+                  >
+                    ← Voltar para Acessar Equipe
+                  </Button>
+                </div>
+              )}
+            </div>
+            
+            <div className="mt-6 pt-6 border-t text-center text-sm text-muted-foreground">
+              <p>
+                Esta ferramenta substitui a planilha Excel manual de estimativa de horas,
+                proporcionando uma experiência mais moderna e colaborativa.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
