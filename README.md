@@ -34,15 +34,15 @@ Uma aplicação web moderna para substituir planilhas Excel manuais de estimativ
 ## 🔧 Configuração
 
 ### 1. Clone o repositório
-\`\`\`bash
-git clone [<repository-url>](https://github.com/Marcus-Boni/Ferramenta-Estimativa-Horas.git)
+```bash
+git clone https://github.com/Marcus-Boni/Ferramenta-Estimativa-Horas.git
 cd ferramenta-estimativa-horas
-\`\`\`
+```
 
 ### 2. Instale as dependências
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 ### 3. Configuração do Firebase
 
@@ -52,7 +52,7 @@ npm install
 4. Crie um banco de dados Firestore
 5. Configure as regras de segurança do Firestore:
 
-\`\`\`javascript
+```javascript
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -62,43 +62,43 @@ service cloud.firestore {
     }
   }
 }
-\`\`\`
+```
 
 ### 4. Configuração das variáveis de ambiente
 
 1. Copie o arquivo de exemplo:
-\`\`\`bash
+```bash
 cp .env.local.example .env.local
-\`\`\`
+```
 
-2. Edite o arquivo \`.env.local\` com as configurações do seu projeto Firebase:
-\`\`\`env
+2. Edite o arquivo `.env.local` com as configurações do seu projeto Firebase:
+```env
 NEXT_PUBLIC_FIREBASE_API_KEY=sua_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=seu_projeto.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=seu_projeto_id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=seu_projeto.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=seu_sender_id
 NEXT_PUBLIC_FIREBASE_APP_ID=seu_app_id
-\`\`\`
+```
 
 ## 🚀 Executando a aplicação
 
 ### Desenvolvimento
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
 ### Produção
-\`\`\`bash
+```bash
 npm run build
 npm start
-\`\`\`
+```
 
 A aplicação estará disponível em [http://localhost:3000](http://localhost:3000)
 
 ## 📁 Estrutura do Projeto
 
-\`\`\`
+```
 src/
 ├── app/
 │   ├── [teamId]/
@@ -119,24 +119,24 @@ src/
 │   └── utils.ts             # Funções utilitárias
 └── types/
     └── index.ts             # Tipos TypeScript
-\`\`\`
+```
 
 ## 📊 Estrutura de Dados (Firestore)
 
-### Coleção: \`teams\`
-- **Documento**: \`teamId\` (ex: "optsolv-dev-team-1")
-  - **Subcoleção**: \`tasks\`
+### Coleção: `teams`
+- **Documento**: `teamId` (ex: "optsolv-dev-team-1")
+  - **Subcoleção**: `tasks`
     - **Campos**:
-      - \`idDaTarefaAzure\`: string (opcional)
-      - \`tituloDaTarefa\`: string
-      - \`contexto\`: string (opcional - módulo/funcionalidade)
-      - \`responsavel\`: string
-      - \`horasEstimadas\`: number
-      - \`createdAt\`: timestamp
+      - `idDaTarefaAzure`: string (opcional)
+      - `tituloDaTarefa`: string
+      - `contexto`: string (opcional - módulo/funcionalidade)
+      - `responsavel`: string
+      - `horasEstimadas`: number
+      - `createdAt`: timestamp
 
 ## 🎨 Design System
 
-A aplicação utiliza a cor laranja da OPTSOLV (\`#EA580C\`) como cor primária, criando uma interface limpa e profissional. Conta com suporte completo ao **dark mode**, alternando automaticamente conforme a preferência do sistema ou permitindo seleção manual.
+A aplicação utiliza a cor laranja da OPTSOLV (`#EA580C`) como cor primária, criando uma interface limpa e profissional. Conta com suporte completo ao **dark mode**, alternando automaticamente conforme a preferência do sistema ou permitindo seleção manual.
 
 ### Funcionalidades visuais:
 - **Tema claro/escuro**: Alternância automática baseada na preferência do sistema
@@ -197,9 +197,9 @@ A aplicação é compatível com qualquer provedor que suporte Next.js 14+
 ## 🤝 Contribuição
 
 1. Fork o projeto
-2. Crie uma branch para sua feature (\`git checkout -b feature/AmazingFeature\`)
-3. Commit suas mudanças (\`git commit -m 'Add some AmazingFeature'\`)
-4. Push para a branch (\`git push origin feature/AmazingFeature\`)
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
 5. Abra um Pull Request
 
 ## 📄 Licença
