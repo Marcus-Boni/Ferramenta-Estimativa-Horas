@@ -1,6 +1,6 @@
 # HourEstimator - Ferramenta de Estimativa de Horas
 
-Uma aplicação web moderna para substituir planilhas Excel manuais de estimativa de horas de tarefas do Azure DevOps. A aplicação é focada em uma única equipe por vez, acessada através de um ID de equipe.
+Uma aplicação web moderna para substituir planilhas Excel manuais de estimativa de horas de tarefas do Azure DevOps. A aplicação é focada em equipes realizarem suas estimativas, acessando através de um ID de equipe.
 
 ## 🚀 Funcionalidades
 
