@@ -208,4 +208,4 @@ Este projeto está sob a licença MIT.
 
 ---
 
-Desenvolvido com ❤️ para modernizar o processo de estimativa de horas.
+Desenvolvido com ❤️ para melhorar o processo de estimativa de horas.
